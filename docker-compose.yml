@@ -1,0 +1,62 @@
+version: '3'
+services:
+  frontend-app:
+    depends_on:
+      - webserver
+    image: my-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fe-container
+    restart: always
+    volumes:
+      - my-frontend:/app
+    ports:
+      - 3000:3000
+
+  backend-app:
+    image: my-backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: be-container
+    restart: always
+    volumes:
+      - my-backend:/app
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mydatabase
+
+  mydatabase:
+    image: mysql
+    restart: always
+    container_name: my-database
+    environment:
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "root"
+    ports:
+      - "3306:3306"
+    volumes:
+      - my-data:/var/lib/mysql
+
+  webserver:
+    image: webserver
+    build:
+      context: ./webserver
+      dockerfile: Dockerfile
+    container_name: webserver-container
+    volumes:
+      - ./webserver/certs:/etc/ssl/private
+    ports:
+      - 443:443
+    restart: always
+
+volumes:
+  my-frontend:
+    external: true
+  my-data:
+    external: true
+  my-backend:
+    external: true
